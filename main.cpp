@@ -17,10 +17,18 @@ using namespace std;
 using namespace std::chrono; 
 //268435456
 const int MAX_N = 270000000;
+
+
+//std::vector<int> dist;
+std::vector<int> heap;
+std::vector<int> xposa;
+
+// int level[SIZE];
+int dist[MAX_N];
+
 bool runtimemeasure = false;
 
-int heap[MAX_N];
-int xposa[MAX_N];
+
 int heapsize;
 
 void decreasekey(int x);
@@ -31,14 +39,11 @@ int key(int i);
 void shiftdown(int x, int i);
 void bubbleup(int x, int i);
 int minchild(int i);
-int& xpos(int x);
+
 
 
 // x position
-int& xpos(int x)
-{
-    return xposa[x];
-}
+
 // get key
 int key(int i)
 {
@@ -50,14 +55,15 @@ void insert(int x)
 
     heapsize += 1;
     // x postion is 
-    xpos(x) = heapsize - 1;
+    
+    xposa[x] = heapsize - 1;
     bubbleup(x, heapsize - 1);
 }
 
 
 void decreasekey(int x)
 {
-    bubbleup(x, xpos(x));
+    bubbleup(x, xposa[x]);
 }
 
 
@@ -66,10 +72,10 @@ int deletemin()
     int x = -1;
     if( heapsize != 0){
         x = heap[0];
-        heap[0] = heap[heapsize - 1];
-        xpos(heap[0]) = 0;
+        //heap[0] = heap[heapsize - 1];
+        xposa[(heap[heapsize - 1])] = 0;
         --heapsize;
-        shiftdown(heap[0], 0);
+        shiftdown(heap[heapsize - 1], 0);
     }
     return x;
 }
@@ -77,8 +83,10 @@ void makeheap(int n)
 {
     heapsize = n;
     for (int i = 0; i < n; ++i){
-        heap[i] = i;
-        xpos(i) = i;
+        //heap[i] = i;
+        heap.push_back(i);
+        //xpos(i) = i;
+        xposa.push_back(i);
     }
 
     for (int i = n -1; i > -1; --i){
@@ -91,13 +99,13 @@ void bubbleup(int x, int i)
     int p = (i - 1)/2;
     while (i != 0 && key(heap[p]) > key(x)){
         heap[i] = heap[p];
-        xpos(heap[p]) = i;
+        xposa[(heap[p])] = i;
         i = p;
         p = (i -1)/2;
     }
     heap[i] = x;
     //keep track
-    xpos(x) = i;
+    xposa[x] = i;
 }
 
 void shiftdown(int x, int i)
@@ -105,12 +113,12 @@ void shiftdown(int x, int i)
     int c = minchild(i);
     while (c != -1 && key(heap[c]) < key(x)) {
         heap[i] = heap[c];
-        xpos(heap[c]) = i;
+        xposa[heap[c]] = i;
         i = c;
         c = minchild(i);
     }
     heap[i] = x;
-    xpos(x) = i;
+    xposa[x] = i;
 }
 
 int minchild(int i)
