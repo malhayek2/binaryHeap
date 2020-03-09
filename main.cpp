@@ -14,19 +14,31 @@ Write your code in this editor and press "Run" button to compile and execute it.
 #include <algorithm> 
 #include <bits/stdc++.h> 
 using namespace std;
-using namespace std::chrono; 
+// using namespace std::chrono; 
 //268435456
 const int MAX_N = 270000000;
+const int MAX_EDGE_N = MAX_N;//a->b,b->a nevermind undirected.
+const int MAX_HEAP_SIZE = MAX_N;//
+
+int edgesnum = 0;
+struct Edge
+{
+    int from;
+    int to;
+    int weight;
+}
+
+edges[MAX_EDGE_N];
+vector<int> node[MAX_N];
+int level[MAX_N];
+int dist[MAX_N];
+int prev[MAX_N];
 
 
-//std::vector<int> dist;
 std::vector<int> heap;
 std::vector<int> xposa;
 
-// int level[SIZE];
-int dist[MAX_N];
-
-bool runtimemeasure = false;
+//bool runtimemeasure = false;
 
 
 int heapsize;
@@ -39,6 +51,8 @@ int key(int i);
 void shiftdown(int x, int i);
 void bubbleup(int x, int i);
 int minchild(int i);
+void addEdge(int v, int u, int weight);
+void prim();
 
 
 
@@ -215,18 +229,107 @@ void measure(int heapsize){
 
 
 }
+// need to add weight ... FUN 
+// 10
+// 2 7 419
+// 8 9 803
+// 6 7 184
+// 4 6 152
+// 2 9 260
+// 5 9 741
+// 3 10 842
+// 5 7 802
+// 9 10 483
+// 1 8 410
+// 2 3 581
+// 1 7 426
+// 3 7 53
+// 3 5 453
+// 6 8 50
+
+void addEdge(int v, int u, int weight){
+    Edge edge;
+    edge.from = v;
+    edge.to =u;
+    edge.weight = weight;
+    node[v].push_back(edgesnum);//[v] -> u1, u2 ..etc
+    edgesnum++;
+    edges[edgesnum] = edge; // add edges 
+}
+// procedure prim (G, w)
+// Input: A connected undirected graph G = (V, E) with edge weights we
+// output: A minimum spanning tree defined by the array prev
+// for all u ∈V: 
+//     cost(u) = ∞
+//     prev(u) =nil
+// pick any initial node u_0 
+// cost(u_0) = 0
+
+// H = makequeue (V)   (priority queue, using cost-values as keys)
+// while H is not empty:
+//     v = deletemin (H)
+//     foreach {v,z}∈E:
+//     if cost(z) > w(v, z) :
+//      cost(z) = w(v, z)
+//     prev(z) = v
+
+void prim(){
+// for all u ∈V: 
+//     cost(u) = ∞
+//     prev(u) =nil
+    for(int i = 0; i <= heapsize; i++){
+        //cost 
+        dist[i] = 270000000; // inf
+        prev[i] = -1; //nill
+    }
+    dist[0] = 0; // start 
+    //make heap n+1
+    while(heapsize != 0){
+        int v = deletemin();
+        for (int i = 0; i < node[v][i].size(); i++){
+            const Edge& e_i = edges[node[v][j]]; 
+            if(dist[e_i.to] > e_i.weight){
+                dist[e_i.to] = e_i.weight;
+                prev[e_i.to] = e_i.from; 
+            }
+        }
+    }
+    std::cout << dist[1] << std::endl;
+
+}
+//textbook example
+void testPrim(int n){
+    // (0)==6==(2)==5==(4)
+    // ||\    /  | \    |
+    // 5   \4,1  2  \3  4 
+    // || /  \   |    \ |
+    // (1)==2===(3)==4=(5)
+    //9 edges
+    addEdge(0,1,5);
+    addEdge(2,4,5);
+    addEdge(4,5,4);
+    addEdge(5,3,4);
+    addEdge(3,1,2);
+    addEdge(0,3,4);
+    addEdge(1,2,1);
+    addEdge(2,5,3);
+    addEdge(2,3,2);
+    makeheap(n+1);
+    prim();
+}
+
 int main(int argc, char **argv)
 {
     // testheap();
     // printheap();
-    std::string arg(argv[1]);
-    std::stringstream ss(arg);
-    int size;
-    ss >> size;
-    std::cout << "size " << size << std::endl;
+    // std::string arg(argv[1]);
+    // std::stringstream ss(arg);
+    // int size;
+    // ss >> size;
+    // std::cout << "size " << size << std::endl;
 
-    measure(size);
-
+    // measure(size);
+    testPrim(6);
 
 
     return 0;
