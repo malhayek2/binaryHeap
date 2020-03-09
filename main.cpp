@@ -13,12 +13,16 @@ Write your code in this editor and press "Run" button to compile and execute it.
 #include <chrono>
 #include <algorithm> 
 #include <bits/stdc++.h> 
-using namespace std;
-// using namespace std::chrono; 
+
+using namespace std::chrono; 
 //268435456
-const int MAX_N = 270000000;
+const int MAX_N = 100000;
 const int MAX_EDGE_N = MAX_N;//a->b,b->a nevermind undirected.
 const int MAX_HEAP_SIZE = MAX_N;//
+
+
+
+
 
 int edgesnum = 0;
 struct Edge
@@ -29,10 +33,11 @@ struct Edge
 }
 
 edges[MAX_EDGE_N];
-vector<int> node[MAX_N];
+std::vector<int> node[MAX_N];
+int prev[MAX_N];
 int level[MAX_N];
 int dist[MAX_N];
-int prev[MAX_N];
+
 
 
 std::vector<int> heap;
@@ -51,8 +56,9 @@ int key(int i);
 void shiftdown(int x, int i);
 void bubbleup(int x, int i);
 int minchild(int i);
-void addEdge(int v, int u, int weight);
 void prim();
+void addEdge(int v, int u, int weight);
+
 
 
 
@@ -61,6 +67,7 @@ void prim();
 // get key
 int key(int i)
 {
+    //prev[i] = 0;
     return dist[i];
 }
 
@@ -185,28 +192,28 @@ void measure(int heapsize){
     end_makeheap = clock();
     double time_taken_makeheap = double(end_makeheap - start_makeheap) / double(CLOCKS_PER_SEC) ; 
     //std::cout << "makeheap() " << fixed << time_taken_makeheap << setprecision(6) << " seconds" << std::endl;
-    myfile  << fixed << time_taken_makeheap << setprecision(6) << ",";
+    myfile  << std::fixed << time_taken_makeheap <<  std::setprecision(6) << ",";
     
     start_deletemin = clock(); 
     deletemin();
     end_deletemin = clock();
     double time_taken_deletemin = double(end_deletemin - start_deletemin) / double(CLOCKS_PER_SEC) ; 
     //std::cout << "deletemin() " << fixed << time_taken_deletemin << setprecision(6) << " seconds" << std::endl;
-    myfile  << fixed << time_taken_deletemin << setprecision(6) << ",";
+    myfile  <<  std::fixed << time_taken_deletemin <<  std::setprecision(6) << ",";
     
     start_insert = clock(); 
     insert(heapsize+1);
     end_insert = clock();
     double time_taken_insert = double(end_insert - start_insert) / double(CLOCKS_PER_SEC) ; 
     //std::cout << "insert() " << fixed << time_taken_insert << setprecision(6) << " seconds" << std::endl;
-    myfile  << fixed << time_taken_insert << setprecision(6) << ",";
+    myfile  <<  std::fixed << time_taken_insert <<  std::setprecision(6) << ",";
     
     start_decreseKey = clock(); 
     decreasekey(heapsize/2);
     end_decreseKey = clock();
     double time_taken_decreseKey = double(end_decreseKey - start_decreseKey) / double(CLOCKS_PER_SEC) ; 
     //std::cout << "decreseKey() " << fixed << time_taken_decreseKey << setprecision(6) << " seconds" << std::endl;
-    myfile  << fixed << time_taken_decreseKey << setprecision(6) << "\n";
+    myfile  <<  std::fixed << time_taken_decreseKey <<  std::setprecision(6) << "\n";
 
     myfile.close();
     // start_bubbleup = clock(); 
@@ -252,7 +259,7 @@ void addEdge(int v, int u, int weight){
     edge.from = v;
     edge.to =u;
     edge.weight = weight;
-    node[v].push_back(edgesnum);//[v] -> u1, u2 ..etc
+    node[v].push_back(edgesnum);//[v] -> has x edges.
     edgesnum++;
     edges[edgesnum] = edge; // add edges 
 }
@@ -279,22 +286,30 @@ void prim(){
 //     prev(u) =nil
     for(int i = 0; i <= heapsize; i++){
         //cost 
-        dist[i] = 270000000; // inf
+        dist[i] = 100000; // inf
         prev[i] = -1; //nill
     }
     dist[0] = 0; // start 
-    //make heap n+1
+    
     while(heapsize != 0){
         int v = deletemin();
-        for (int i = 0; i < node[v][i].size(); i++){
-            const Edge& e_i = edges[node[v][j]]; 
+        for (unsigned int i = 0; i <= node[v].size(); i++){
+            const Edge& e_i = edges[node[v][i]]; 
             if(dist[e_i.to] > e_i.weight){
                 dist[e_i.to] = e_i.weight;
                 prev[e_i.to] = e_i.from; 
             }
         }
     }
-    std::cout << dist[1] << std::endl;
+    int weights = 0;
+    for(int i = 0; i <= 5 ; i++){
+
+        std::cout << "dist[" << i << "]" << " -> " << dist[i] << std::endl;
+        weights = weights + dist[i];
+        std::cout << "prev[" << i << "]" << " -> " << prev[i] << std::endl; 
+    
+    }
+    std::cout << "total weights " << weights; 
 
 }
 //textbook example
@@ -314,8 +329,37 @@ void testPrim(int n){
     addEdge(1,2,1);
     addEdge(2,5,3);
     addEdge(2,3,2);
-    makeheap(n+1);
+    makeheap(n);
     prim();
+    //14 expected
+    //testing..
+    // (0)      (2)*=5==(4)
+    //   \     /   \      
+    //    \4,1      \3     
+    //   /      \      \   
+    // (1)==2===(3)     (5)
+
+//dist[0] -> 0
+// prev[0] -> -1
+
+// dist[1] -> 2
+// prev[1] -> 3 from 3 -> 1 / cost 2 ok
+
+// dist[2] -> 1 cost of 1 from 1-> 2  // ok
+// prev[2] -> 1
+
+// dist[3] -> 4 cost of 4.
+// prev[3] -> 0 from 0->3 ok
+
+// dist[4] -> 5 cost of 5 
+// prev[4] -> 2 from 2->4 intresting... 
+
+// dist[5] -> 3 cost of 3 
+// prev[5] -> 2 from 2->5
+
+
+
+
 }
 
 int main(int argc, char **argv)
