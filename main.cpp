@@ -31,13 +31,15 @@ struct Edge
     int from;
     int to;
     int weight;
-}
-
-edges[MAX_EDGE_N];
+};
+std::vector<Edge> edges;
+//edges[MAX_EDGE_N];
 std::vector<int> node[MAX_N];
-int prev[MAX_N]; 
+//int prev[MAX_N];
+std::vector<int> prev;
 int level[MAX_N];
 int dist[MAX_N];
+std::vector<int> cost;
 
 
 
@@ -249,7 +251,7 @@ void addEdge(int v, int u, int weight){
     //std::cout << "node[" << v << "]" << ".push_back(" << edgesnum << ")" << std::endl;
     edgesnum++;
     //std::cout << "edgesnum++" << edgesnum << std::endl;
-    edges[edgesnum] = edge; // add edges 
+    edges.push_back(edge); // add edges 
     //std::cout << "edges[" << edgesnum << "]" << " = " << edge.from  << "->" << edge.to << std::endl; 
 }
 // procedure prim (G, w)
@@ -276,11 +278,13 @@ void prim(){
     int initialheapsize = heapsize;
     for(int i = 0; i <= heapsize; i++){
         //cost 
-        dist[i] = 100000; // inf
-        prev[i] = -1; //nill
+        //dist[i] = 100000; // inf
+        cost.push_back(100000);
+        prev.push_back(-1);
+        //prev[i] = -1; //nill
     }
-    dist[0] = 0; // start 
-    
+    //dist[0] = 0; // start 
+    cost[0] = 0;
     while(heapsize != 0){
         int v = deletemin();
         //std::cout << "v value is" << v << std::endl;
@@ -289,9 +293,9 @@ void prim(){
             //std::cout << "edge # " << node[v][i] << "checked" << std::endl;
             //std::cout << "node f " << e_i.from << " -> " << e_i.to << " weight " << e_i.weight << std::endl; 
             //std::cout << "dis[" << e_i.to << "] " << dist[e_i.to] << " > " << e_i.weight << std::endl;
-            if(dist[e_i.to] > e_i.weight){
+            if(cost[e_i.to] > e_i.weight){
                 //std::cout << "============================================" << std::endl;
-                dist[e_i.to] = e_i.weight;
+                cost[e_i.to] = e_i.weight;
                 //std::cout << "setting dist weight of to node " << e_i.weight << std::endl;
                 prev[e_i.to] = e_i.from; 
 
@@ -303,10 +307,10 @@ void prim(){
     for(int i = 0; i <= initialheapsize ; i++){
 
       //  std::cout << "dist[" << i << "]" << " -> " << dist[i] << std::endl;
-        if (dist[i] !=100000)
+        if (cost[i] !=100000)
         {
             /* code */
-            weights = weights + dist[i];
+            weights = weights + cost[i];
         }
         
     //        std::cout << "prev[" << i << "]" << " -> " << prev[i] << std::endl; 
@@ -335,6 +339,7 @@ void testPrim(int n){
     addEdge(6,4,4);
     makeheap(n);
     prim();
+    std::cout << "total weights" << weights <<std::endl;
     //14 expected
     //testing..
     // (0)      (2)*=5==(4)
@@ -408,7 +413,7 @@ int main(int argc, char **argv)
     myoutputfile  << myText << "," << size << "," << weights << "," <<  std::fixed << time_taken_prim <<  std::setprecision(6) << "\n";
     myoutputfile.close();
     // measure(size);
-    // testPrim(6);
+    //testPrim(6);
 
 
     return 0;
