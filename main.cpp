@@ -25,6 +25,7 @@ const int MAX_HEAP_SIZE = MAX_N;//
 
 
 int edgesnum = 0;
+int weights = 0;
 struct Edge
 {
     int from;
@@ -34,7 +35,7 @@ struct Edge
 
 edges[MAX_EDGE_N];
 std::vector<int> node[MAX_N];
-int prev[MAX_N];
+int prev[MAX_N]; 
 int level[MAX_N];
 int dist[MAX_N];
 
@@ -103,7 +104,7 @@ int deletemin()
 void makeheap(int n)
 {
     heapsize = n;
-    for (int i = 0; i < n; ++i){
+    for (int i = 1; i < n; ++i){
         //heap[i] = i;
         heap.push_back(i);
         //xpos(i) = i;
@@ -237,22 +238,7 @@ void measure(int heapsize){
 
 }
 // need to add weight ... FUN 
-// 10
-// 2 7 419
-// 8 9 803
-// 6 7 184
-// 4 6 152
-// 2 9 260
-// 5 9 741
-// 3 10 842
-// 5 7 802
-// 9 10 483
-// 1 8 410
-// 2 3 581
-// 1 7 426
-// 3 7 53
-// 3 5 453
-// 6 8 50
+
 
 void addEdge(int v, int u, int weight){
     Edge edge;
@@ -260,8 +246,11 @@ void addEdge(int v, int u, int weight){
     edge.to =u;
     edge.weight = weight;
     node[v].push_back(edgesnum);//[v] -> has x edges.
+    //std::cout << "node[" << v << "]" << ".push_back(" << edgesnum << ")" << std::endl;
     edgesnum++;
+    //std::cout << "edgesnum++" << edgesnum << std::endl;
     edges[edgesnum] = edge; // add edges 
+    //std::cout << "edges[" << edgesnum << "]" << " = " << edge.from  << "->" << edge.to << std::endl; 
 }
 // procedure prim (G, w)
 // Input: A connected undirected graph G = (V, E) with edge weights we
@@ -284,6 +273,7 @@ void prim(){
 // for all u ∈V: 
 //     cost(u) = ∞
 //     prev(u) =nil
+    int initialheapsize = heapsize;
     for(int i = 0; i <= heapsize; i++){
         //cost 
         dist[i] = 100000; // inf
@@ -293,23 +283,36 @@ void prim(){
     
     while(heapsize != 0){
         int v = deletemin();
-        for (unsigned int i = 0; i <= node[v].size(); i++){
-            const Edge& e_i = edges[node[v][i]]; 
+        //std::cout << "v value is" << v << std::endl;
+        for (unsigned int i = 0; i < node[v].size(); i++){
+            const Edge& e_i = edges[node[v][i]];
+            //std::cout << "edge # " << node[v][i] << "checked" << std::endl;
+            //std::cout << "node f " << e_i.from << " -> " << e_i.to << " weight " << e_i.weight << std::endl; 
+            //std::cout << "dis[" << e_i.to << "] " << dist[e_i.to] << " > " << e_i.weight << std::endl;
             if(dist[e_i.to] > e_i.weight){
+                //std::cout << "============================================" << std::endl;
                 dist[e_i.to] = e_i.weight;
+                //std::cout << "setting dist weight of to node " << e_i.weight << std::endl;
                 prev[e_i.to] = e_i.from; 
+
+                //std::cout << "setting perv from of to node " << e_i.from << std::endl;
             }
         }
     }
-    int weights = 0;
-    for(int i = 0; i <= 5 ; i++){
+    
+    for(int i = 0; i <= initialheapsize ; i++){
 
-        std::cout << "dist[" << i << "]" << " -> " << dist[i] << std::endl;
-        weights = weights + dist[i];
-        std::cout << "prev[" << i << "]" << " -> " << prev[i] << std::endl; 
+      //  std::cout << "dist[" << i << "]" << " -> " << dist[i] << std::endl;
+        if (dist[i] !=100000)
+        {
+            /* code */
+            weights = weights + dist[i];
+        }
+        
+    //        std::cout << "prev[" << i << "]" << " -> " << prev[i] << std::endl; 
     
     }
-    std::cout << "total weights " << weights; 
+   // std::cout << "total weights " << weights; 
 
 }
 //textbook example
@@ -320,15 +323,16 @@ void testPrim(int n){
     // || /  \   |    \ |
     // (1)==2===(3)==4=(5)
     //9 edges
-    addEdge(0,1,5);
-    addEdge(2,4,5);
-    addEdge(4,5,4);
-    addEdge(5,3,4);
-    addEdge(3,1,2);
-    addEdge(0,3,4);
-    addEdge(1,2,1);
-    addEdge(2,5,3);
-    addEdge(2,3,2);
+    addEdge(1,2,5);
+    addEdge(1,4,4);
+    addEdge(1,3,6);
+    addEdge(2,3,1);
+    addEdge(3,5,5);
+    addEdge(3,6,3);
+    addEdge(3,4,2);
+    addEdge(4,2,2);
+    addEdge(5,6,4);
+    addEdge(6,4,4);
     makeheap(n);
     prim();
     //14 expected
@@ -361,20 +365,75 @@ void testPrim(int n){
 
 
 }
+// void totalWeightsToCSV(){
+//     std::ofstream myfile;
+//     myfile.open ("output2.csv" , std::ios_base::app);
+//     myfile  << filename << "," << weights << "\n";
+//     myfile.close();
+// }
+
 
 int main(int argc, char **argv)
 {
+
+    std::string arg(argv[0]);
+    std::stringstream ss(arg);
+    std::string myText = argv[1]; 
+
+    //std::cout << "open file "  << argv[1] << myText <<std::endl;
+    std::ifstream myfile;
+    myfile.open (myText);
+    int size;
+    myfile >> size;
+    //std::cout << "size" << size << " " << std::endl;
+    
+    int a, b,c;
+    while (myfile >> a >> b >> c)
+    {
+        addEdge(a,b,c);
+
+        //std::cout << a << " -> " << b << " weight " << c << " " <<std::endl;
+    }
+    makeheap(size);
+    clock_t start_prim, end_prim;
     // testheap();
     // printheap();
-    // std::string arg(argv[1]);
-    // std::stringstream ss(arg);
-    // int size;
-    // ss >> size;
-    // std::cout << "size " << size << std::endl;
-
+    start_prim = clock();
+    prim();
+    end_prim = clock();
+    double time_taken_prim = double(end_prim - start_prim) / double(CLOCKS_PER_SEC) ; 
+    //std::cout << "decreseKey() " << fixed << time_taken_decreseKey << setprecision(6) << " seconds" << std::endl;
+    std::ofstream myoutputfile;
+    myoutputfile.open ("output2.csv" , std::ios_base::app);
+    myoutputfile  << myText << "," << size << "," << weights << "," <<  std::fixed << time_taken_prim <<  std::setprecision(6) << "\n";
+    myoutputfile.close();
     // measure(size);
-    testPrim(6);
+    // testPrim(6);
 
 
     return 0;
 }
+
+
+    // std::string arg(argv[0]);
+    // std::stringstream ss(arg);
+    // std::string myText = argv[1]; 
+
+    // //std::cout << "open file "  << argv[1] << myText <<std::endl;
+    // std::ifstream myfile;
+    // myfile.open (myText);
+    // int size;
+    // myfile >> size;
+    // //std::cout << "size" << size << " " << std::endl;
+    
+    // int a, b,c;
+    // while (myfile >> a >> b >> c)
+    // {
+    //     addEdge(a,b,c);
+
+    //     //std::cout << a << " -> " << b << " weight " << c << " " <<std::endl;
+    // }
+    // makeheap(size);
+    // // testheap();
+    // // printheap();
+    // prim();
